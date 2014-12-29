@@ -15,16 +15,21 @@ function rndint(max) {
 function choice(a) {
     return a[rndint(a.length)];
 }
-var fishTypes = [];
+var fishTypes = [],
+    winWidth = 90,
+    winHeight = 30;
 
 var Aquarium = {
+
     bubbles: [],
     blubbPos: [],
     corals: [],
     current: 0,
     fishes: [],
 
+
     init: function () {
+
         fs.readFile('fishes', 'utf8', function (err, data) {
             var lines = data.split('\n');
             var tmp = [];
@@ -58,17 +63,17 @@ var Aquarium = {
 
         // init bubble starting positions 
         for (var i = 0; i < 6; i += 1) {
-            this.blubbPos.push(rndint(80));
+            this.blubbPos.push(rndint(winWidth));
         }
 
         // init bubbles
-        for (i = 0; i < 90; i += 1) {
+        for (i = 0; i < winWidth + 10; i += 1) {
             char = choice("oO.");
             speed = 1 + rnd(2);
             this.bubbles.push({
                 age: rndint(1000),
-                x: rnd(80),
-                y: rnd(24),
+                x: rnd(winWidth),
+                y: rnd(winHeight),
                 char: char,
                 speed: speed
             });
@@ -78,7 +83,7 @@ var Aquarium = {
         for (i = 0; i < 20; i++) {
             this.corals.push({
                 age: rndint(1000),
-                x: rndint(80), // position
+                x: rndint(winWidth), // position
                 len: 2 + Math.pow(rnd(2), 2.2), //length (height)
                 w: rnd(3), //width
                 char: choice("%:&.")
@@ -86,7 +91,7 @@ var Aquarium = {
             });
         }
 
-        setInterval(this.frameHandler, 100);
+        setInterval(this.frameHandler, 200);
     },
 
     frameHandler: function () {
@@ -96,15 +101,42 @@ var Aquarium = {
         var x, y;
 
         // refresh everything
-        for (x = 0; x <= 80; x++)
-            for (y = 0; y <= 24; y++)
+        for (x = 0; x <= winWidth; x++)
+            for (y = 0; y <= winHeight; y++)
                 restore(x, y);
+
+        // fishieeeeessss
+        if (Aquarium.fishes.length < 6) {
+            Aquarium.fishes.push({
+                x: rndint(2)?-10:winWidth+5,
+                y: rnd(winHeight),
+                str: choice(fishTypes),
+                vx: rnd(2) - 1
+            });
+        }
+        for (i = Aquarium.fishes.length - 1; i >= 0; i--) {
+            var fish = Aquarium.fishes[i];
+            fish.x += fish.vx;
+            if (fish.x > winWidth + 10 || fish.x < -20) {
+                Aquarium.fishes.splice(i, 1);
+                break;
+            }
+            if (rndint(50) === 0) fish.vx *= -1;
+            for (var k = 0; k < fish.str[0].length; k++) {
+                var str = fish.str[fish.vx > 0 ? 0 : 1][k];
+                var width = str.length;
+                for (var j = 0; j < width; j++) {
+                    x = fish.x + j;
+                    put(x, k + fish.y, str[j]);
+                }
+            }
+        }
 
 
         for (var i = 0; i < Aquarium.corals.length; i++) {
             var coral = Aquarium.corals[i];
             var coralX = coral.x;
-            var coralY = 24;
+            var coralY = winHeight;
             coral.age++;
 
 
@@ -128,7 +160,7 @@ var Aquarium = {
             if (bub.y < 0) {
                 bub.y = 30 + rndint(200);
                 if (rndint(5) === 0) {
-                    bub.x = rndint(80);
+                    bub.x = rndint(winWidth);
                 } else {
                     bub.x = choice(Aquarium.blubbPos);
                 }
@@ -137,37 +169,6 @@ var Aquarium = {
         }
 
 
-        // fishieeeeessss
-
-        if (Aquarium.fishes.length < 6) {
-            Aquarium.fishes.push({
-                x: -8,
-                y: rnd(20),
-                str: choice(fishTypes),
-                vx: rnd(0.8) + 0.2
-            });
-        }
-
-        for (i = Aquarium.fishes.length - 1; i >= 0; i--) {
-            var fish = Aquarium.fishes[i];
-            fish.x += fish.vx;
-            if (fish.x > 90 || fish.x < -20) {
-                Aquarium.fishes.splice(i, 1);
-                break;
-            }
-
-            if (rndint(50) === 0) fish.vx *= -1;
-
-            for (var k = 0; k < fish.str[0].length; k++) {
-                var str = fish.str[fish.vx > 0 ? 0 : 1][k];
-                var width = str.length;
-                for (var j = 0; j < width; j++) {
-                    x = fish.x + j;
-                    put(x, k + fish.y, str[j]);
-                }
-
-            }
-        }
     }
 
 };
@@ -176,7 +177,8 @@ var Aquarium = {
 
 
 function put(x, y, str, color) {
-    if (x >= 0 && y >= 0 && x <= 80 && y <= 24) {
+    if (x >= 0 && y >= 0 && x <= winWidth && y <= winHeight) {
+        // win.chgat(y, x, 1, win.attrs.NORMAL);
         win.addstr(~~y, ~~x, str);
     }
 }
