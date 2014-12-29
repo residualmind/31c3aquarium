@@ -1,6 +1,7 @@
 /*jshint multistr: true */
 var nc = require('ncurses'),
-    win = new nc.Window();
+    win = new nc.Window(),
+    fs = require('fs');
 
 // helpers 
 function rnd(max) {
@@ -14,20 +15,45 @@ function rndint(max) {
 function choice(a) {
     return a[rndint(a.length)];
 }
-
-var fishes = [
-    '><>',
-    ')()'
-];
-
+var fishTypes = [];
 
 var Aquarium = {
     bubbles: [],
     blubbPos: [],
     corals: [],
     current: 0,
+    fishes: [],
 
     init: function () {
+        fs.readFile('fishes', 'utf8', function (err, data) {
+            var lines = data.split('\n');
+            var tmp = [];
+            var fishIndex = 0;
+            var frame = 0;
+            var left = [];
+            var right = [];
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (line[0] !== '#') {
+                    tmp.push(line);
+                    if (line.length === 0) {
+                        if (frame === 0) {
+                            left = tmp.concat();
+                            frame++;
+                            console.log(tmp);
+                            console.log(left);
+                            tmp = [];
+                        } else {
+                            right = tmp.concat();
+                            frame = 0;
+                            fishTypes.push([left, right]);
+                            tmp = [];
+                        }
+                    }
+                }
+            }
+        });
+
 
 
         // init bubble starting positions 
@@ -71,7 +97,7 @@ var Aquarium = {
 
         // refresh everything
         for (x = 0; x <= 80; x++)
-            for (y = 13; y <= 24; y++)
+            for (y = 0; y <= 24; y++)
                 restore(x, y);
 
 
@@ -108,6 +134,39 @@ var Aquarium = {
                 }
             }
             put(bub.x, bub.y, bub.char);
+        }
+
+
+        // fishieeeeessss
+
+        if (Aquarium.fishes.length < 6) {
+            Aquarium.fishes.push({
+                x: -8,
+                y: rnd(20),
+                str: choice(fishTypes),
+                vx: rnd(0.8) + 0.2
+            });
+        }
+
+        for (i = Aquarium.fishes.length - 1; i >= 0; i--) {
+            var fish = Aquarium.fishes[i];
+            fish.x += fish.vx;
+            if (fish.x > 90 || fish.x < -20) {
+                Aquarium.fishes.splice(i, 1);
+                break;
+            }
+
+            if (rndint(50) === 0) fish.vx *= -1;
+
+            for (var k = 0; k < fish.str[0].length; k++) {
+                var str = fish.str[fish.vx > 0 ? 0 : 1][k];
+                var width = str.length;
+                for (var j = 0; j < width; j++) {
+                    x = fish.x + j;
+                    put(x, k + fish.y, str[j]);
+                }
+
+            }
         }
     }
 
