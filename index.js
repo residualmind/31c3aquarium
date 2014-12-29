@@ -1,3 +1,4 @@
+/*jshint multistr: true */
 var nc = require('ncurses'),
     win = new nc.Window();
 
@@ -7,13 +8,17 @@ function rnd(max) {
 }
 
 function rndint(max) {
-    return (~~(Math.random() * max));
+    return (Math.floor(Math.random() * max));
 }
 
 function choice(a) {
     return a[rndint(a.length)];
 }
 
+var fishes = [
+    '><>',
+    ')()'
+];
 
 
 var Aquarium = {
@@ -21,15 +26,19 @@ var Aquarium = {
     blubbPos: [],
     corals: [],
     current: 0,
+
     init: function () {
 
+
+        // init bubble starting positions 
         for (var i = 0; i < 6; i += 1) {
             this.blubbPos.push(rndint(80));
         }
 
-        for (i = 0; i < 40; i += 1) {
+        // init bubbles
+        for (i = 0; i < 90; i += 1) {
             char = choice("oO.");
-            speed = 1 + rnd(3);
+            speed = 1 + rnd(2);
             this.bubbles.push({
                 age: rndint(1000),
                 x: rnd(80),
@@ -39,26 +48,48 @@ var Aquarium = {
             });
         }
 
-        for (i = 0; i < 6; i++) {
+        // init corals
+        for (i = 0; i < 20; i++) {
             this.corals.push({
-                age: 0,
-                x: rndint(80)
-            });
+                age: rndint(1000),
+                x: rndint(80), // position
+                len: 2 + Math.pow(rnd(2), 2.2), //length (height)
+                w: rnd(3), //width
+                char: choice("%:&.")
 
+            });
         }
 
         setInterval(this.frameHandler, 100);
     },
+
     frameHandler: function () {
-        put(0, 0, '');
+        put(0, 0, ''); // move cursor somewhere 
         win.refresh();
+
+        var x, y;
+
+        // refresh everything
+        for (x = 0; x <= 80; x++)
+            for (y = 13; y <= 24; y++)
+                restore(x, y);
+
+
         for (var i = 0; i < Aquarium.corals.length; i++) {
-            var coralX = Aquarium.corals[i].x;
+            var coral = Aquarium.corals[i];
+            var coralX = coral.x;
             var coralY = 24;
-            for (var l = 0; l < 8; l++) {
-                var x = coralX + Math.cos(l / 10) * 10;
-                var y = coralY - l;
-                put(x, y, '%');
+            coral.age++;
+
+
+            for (var l = 0; l < coral.len; l++) {
+                y = coralY - l;
+                x = coralX + Math.cos(coral.age / 2 + l) / 2 * Math.min(l, 4);
+                restore(x, y);
+                var w = (coral.len - l) / 10 * coral.w;
+                for (var xpos = x - w; xpos <= x + w; xpos++) {
+                    put(xpos, y, coral.char);
+                }
             }
         }
 
@@ -85,9 +116,10 @@ var Aquarium = {
 
 
 
-function put(x, y, str) {
-    if (x >= 0 && y >= 0 && x <= 80 && y <= 24)
+function put(x, y, str, color) {
+    if (x >= 0 && y >= 0 && x <= 80 && y <= 24) {
         win.addstr(~~y, ~~x, str);
+    }
 }
 
 function restore(x, y, str) {
