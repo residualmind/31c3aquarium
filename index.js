@@ -32,7 +32,9 @@ var Aquarium = {
 
     init: function () {
 
+
         win.leaveok(true);
+        nc.showCursor=false;
 
         fs.readFile('fishes', 'utf8', function (err, data) {
             var lines = data.split('\n');
@@ -102,7 +104,7 @@ var Aquarium = {
         var x, y;
 
         win.erase();
-        win.frame();
+        // win.frame();
 
         // fishieeeeessss
         if (Aquarium.fishes.length < winWidth / 20) {
@@ -176,6 +178,8 @@ var Aquarium = {
         put(0, 0, ' '); // move cursor somewhere 
         win.refresh();
 
+        nc.colorPair(1,rndint(16),0);
+        win.attrset(nc.colorPair(1));
     }
 
 };
@@ -188,7 +192,9 @@ function put(x, y, str, color) {
     x = Math.floor(x);
     y = Math.floor(y);
     if (x > 0 && y > 0 && x < winWidth - 1 && y < winHeight - 1 && str !== ' ') {
-        // win.chgat(y, x, 1, win.attrs.NORMAL);
+        // nc.colorPair(3,rndint(5),rndint(5));
+
+
         win.addstr(Math.floor(y), Math.floor(x), str);
     }
 }
