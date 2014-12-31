@@ -4,8 +4,8 @@
 
 ## Installation
 
-npm install
-npm start
+    npm install
+    npm start
 
 ## API Reference
 
@@ -13,7 +13,7 @@ Depending on the size of the project, if it is small and simple enough the refer
 
 ## Tests
 
-npm test
+    npm test
 
 ## Contributors
 
