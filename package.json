@@ -1,18 +1,21 @@
 {
-  "name": "fish",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "node --harmony index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "blessed": "0.0.37",
-    "ncurses": "^0.4.1",
-    "node-gyp": "^1.0.2",
-    "telnet": "0.0.1"
-  }
+    "name": "fish",
+    "version": "1.0.0",
+    "description": "",
+    "main": "main.js",
+    "scripts": {
+        "start": "node --harmony main.js",
+        "test": "echo \"everything is super-good\""
+    },
+    "author": "swarm",
+    "license": "MIT",
+    "dependencies": {
+        "keypress": "^0.2.1",
+        "ncurses": "^0.4.1",
+        "node-gyp": "^1.0.2"
+    },
+    "engines": {
+        "node": "0.10.x",
+    }
+
 }
